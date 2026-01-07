@@ -88,11 +88,12 @@ struct modifier_symbol *modifier_symbols[] = {
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
+#if IS_ENABLED(CONFIG_ZMK_DONGLE_DISPLAY_MODIFIERS_ANIMATION)
 static void anim_y_cb(void *var, int32_t v) {
     lv_obj_set_y(var, v);
 }
 
-static void move_object_y(void *obj, int32_t from, int32_t to) {
+static void move_object_y(lv_obj_t *obj, int32_t from, int32_t to) {
     lv_anim_t a;
     lv_anim_init(&a);
     lv_anim_set_var(&a, obj);
@@ -102,18 +103,33 @@ static void move_object_y(void *obj, int32_t from, int32_t to) {
     lv_anim_set_values(&a, from, to);
     lv_anim_start(&a);
 }
+#else
+static void move_object_y(lv_obj_t *obj, int32_t to) {
+    lv_obj_set_y(obj, to);
+}
+#endif
 
 static void set_modifiers(lv_obj_t *widget, struct modifiers_state state) {
     for (int i = 0; i < NUM_SYMBOLS; i++) {
         bool mod_is_active = state.modifiers & modifier_symbols[i]->modifier;
 
         if (mod_is_active && !modifier_symbols[i]->is_active) {
+#if IS_ENABLED(CONFIG_ZMK_DONGLE_DISPLAY_MODIFIERS_ANIMATION)
             move_object_y(modifier_symbols[i]->symbol, 1, 0);
             move_object_y(modifier_symbols[i]->selection_line, SIZE_SYMBOLS + 4, SIZE_SYMBOLS + 2);
+#else
+            move_object_y(modifier_symbols[i]->symbol, 0);
+            move_object_y(modifier_symbols[i]->selection_line, SIZE_SYMBOLS + 2);
+#endif
             modifier_symbols[i]->is_active = true;
         } else if (!mod_is_active && modifier_symbols[i]->is_active) {
+#if IS_ENABLED(CONFIG_ZMK_DONGLE_DISPLAY_MODIFIERS_ANIMATION)
             move_object_y(modifier_symbols[i]->symbol, 0, 1);
             move_object_y(modifier_symbols[i]->selection_line, SIZE_SYMBOLS + 2, SIZE_SYMBOLS + 4);
+#else
+            move_object_y(modifier_symbols[i]->symbol, 1);
+            move_object_y(modifier_symbols[i]->selection_line, SIZE_SYMBOLS + 4);
+#endif
             modifier_symbols[i]->is_active = false;
         }
     }

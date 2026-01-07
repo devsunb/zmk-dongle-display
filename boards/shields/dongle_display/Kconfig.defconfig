@@ -33,6 +33,15 @@ config ZMK_DONGLE_DISPLAY_MODIFIERS
     bool "Display the modifiers widget"
     default y
 
+config ZMK_DONGLE_DISPLAY_MODIFIERS_ANIMATION
+    bool "Enable animation for the modifiers widget"
+    depends on ZMK_DONGLE_DISPLAY_MODIFIERS
+    default y
+    help
+        Enable smooth animation when modifiers are pressed/released.
+        Warning: May cause system freeze when pressing all 4 modifiers
+        simultaneously on resource-constrained MCUs. Set to 'n' to disable.
+
 config ZMK_DONGLE_DISPLAY_LAYER
     bool "Display the highest layer widget"
     default y
